@@ -15,3 +15,6 @@ Route::get('/user-profile', [AuthController::class, 'userProfile']);
 
 Route::get('/products', [ProductsController::class, 'index']);
 Route::post('/product/save', [ProductsController::class, 'productSave']);
+Route::get('/product/{id}', [ProductsController::class, 'productShow']);
+Route::put('/product/{id}', [ProductsController::class, 'productUpdate']);
+Route::delete('/product/{id}', [ProductsController::class, 'productDelete']);
