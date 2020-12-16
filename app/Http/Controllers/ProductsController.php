@@ -21,27 +21,32 @@ class ProductsController extends Controller
 
     public function productSave(Request $request)
     {
-        $filename = Null;
+        try {
+            $filename = Null;
 
-        $this->validate($request, [
-            'title' => 'required|max:255',
-            'price' => 'required',
-        ]);
+            $this->validate($request, [
+                'title' => 'required|max:255',
+                'price' => 'required|numeric',
+            ]);
 
-        if ($request->file('image')) {
+            if ($request->file('image')) {
 
-            $this->validate($request, ['image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',]);
-            $filename = time().'.'.$request->file('image')->getClientOriginalExtension();
-            $request->image->move(public_path('images/products'), $filename);
+                $this->validate($request, ['image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',]);
+                $filename = time().'.'.$request->file('image')->getClientOriginalExtension();
+                $request->image->move(public_path('images/products'), $filename);
+            }
+
+            $product = new Product();
+            $product->title       = $request->title;
+            $product->description = $request->description;
+            $product->price       = $request->price;
+            $product->image       = $filename;
+            $product->save();
+            return response()->json(['status' => 'success', 'message' => 'Product successfully saved!'], 201);
+        }catch (ValidationException $exception) {
+            return response()->json(['status' => 'error', 'message' => 'Error', 'errors' => $exception->errors()], 422);
         }
-
-        $product = new Product();
-        $product->title       = $request->title;
-        $product->description = $request->description;
-        $product->price       = $request->price;
-        $product->image       = $filename;
-        $product->save();
-        return response()->json(['message' => 'Product successfully saved!']);
+        
     }
 
     public function productShow($id)
@@ -51,31 +56,35 @@ class ProductsController extends Controller
 
     public function productUpdate(Request $request, $id)
     {
-        // return $id;
-        // return $request->all();
-        $this->validate($request, [
-            'title' => 'required|max:255',
-            'price' => 'required',
-        ]);
+        try {
+            // return $id;
+            // return $request->all();
+            $this->validate($request, [
+                'title' => 'required|max:255',
+                'price' => 'required',
+            ]);
 
-        $product = Product::find($id);
-        $product->title       = $request->title;
-        $product->description = $request->description;
-        $product->price       = $request->price;
-        if ($request->file('image')) {
+            $product = Product::find($id);
+            $product->title       = $request->title;
+            $product->description = $request->description;
+            $product->price       = $request->price;
+            if ($request->file('image')) {
 
-            $this->validate($request, ['image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',]);
+                $this->validate($request, ['image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',]);
 
-            //remove old photo from folder if exist
-            $image_path = public_path('images/products/').$product->image;
-            unlink($image_path);
+                //remove old photo from folder if exist
+                $image_path = public_path('images/products/').$product->image;
+                unlink($image_path);
 
-            $filename = time().'.'.$request->file('image')->getClientOriginalExtension();
-            $request->image->move(public_path('images/products'), $filename);
-            $product->image = $filename;
+                $filename = time().'.'.$request->file('image')->getClientOriginalExtension();
+                $request->image->move(public_path('images/products'), $filename);
+                $product->image = $filename;
+            }
+            $product->save();            
+            return response()->json(['status' => 'success', 'message' => 'Product successfully updated!'], 201);
+        }catch (ValidationException $exception) {
+            return response()->json(['status' => 'error', 'message' => 'Error', 'errors' => $exception->errors()], 422);
         }
-        $product->save();
-        return response()->json(['message' => 'Product successfully updated!']);
     }
 
     public function productDelete($id)
