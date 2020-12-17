@@ -6,6 +6,13 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
+## weDevs Assignment
+<p>
+Click - <a href="https://travis-ci.org/laravel/framework">Live Demo</a>
+</p>
+<p><b>Login credentials:</b></p>
+<p>Email: admin@admin.com</p>
+<p>Password: password</p>
 
 ## About Laravel
 
