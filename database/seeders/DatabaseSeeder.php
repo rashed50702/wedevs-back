@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
     	$user->remember_token = Str::random(10);
     	$user->save();
 
-        User::factory(10)->create();
+        // User::factory(10)->create();
 
         $this->call([
             ProductTableSeeder::class,

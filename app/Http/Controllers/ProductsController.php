@@ -19,7 +19,23 @@ class ProductsController extends Controller
         return Product::orderBy('title', 'asc')->get();
     }
 
-    public function productSave(Request $request)
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
     {
         try {
             $filename = Null;
@@ -43,83 +59,9 @@ class ProductsController extends Controller
             $product->image       = $filename;
             $product->save();
             return response()->json(['status' => 'success', 'message' => 'Product successfully saved!'], 201);
-        }catch (ValidationException $exception) {
+        }catch (\Exception $exception) {
             return response()->json(['status' => 'error', 'message' => 'Error', 'errors' => $exception->errors()], 422);
         }
-        
-    }
-
-    public function productShow($id)
-    {
-        return Product::where('id', $id)->first();
-    }
-
-    public function productUpdate(Request $request, $id)
-    {
-        try {
-            // return $id;
-            // return $request->all();
-            $this->validate($request, [
-                'title' => 'required|max:255',
-                'price' => 'required',
-            ]);
-
-            $product = Product::find($id);
-            $product->title       = $request->title;
-            $product->description = $request->description;
-            $product->price       = $request->price;
-            if ($request->file('image')) {
-
-                $this->validate($request, ['image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',]);
-
-                //remove old photo from folder if exist
-                $image_path = public_path('images/products/').$product->image;
-                unlink($image_path);
-
-                $filename = time().'.'.$request->file('image')->getClientOriginalExtension();
-                $request->image->move(public_path('images/products'), $filename);
-                $product->image = $filename;
-            }
-            $product->save();            
-            return response()->json(['status' => 'success', 'message' => 'Product successfully updated!'], 201);
-        }catch (ValidationException $exception) {
-            return response()->json(['status' => 'error', 'message' => 'Error', 'errors' => $exception->errors()], 422);
-        }
-    }
-
-    public function productDelete($id)
-    {
-        $product = Product::find($id);
-        if ($product->image) {
-            $productImage = public_path("images/products/{$product->image}");
-            if (File::exists($productImage)) {
-                unlink($productImage);
-            }
-        }
-        $product->delete();
-
-        return Response::json(['message' => 'The product deleted successfully!'], 200);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
     }
 
     /**
@@ -130,7 +72,7 @@ class ProductsController extends Controller
      */
     public function show($id)
     {
-        //
+        return Product::where('id', $id)->first();
     }
 
     /**
@@ -153,7 +95,40 @@ class ProductsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        try {
+            // return $id;
+            // return $request->all();
+            $this->validate($request, [
+                'title' => 'required|max:255',
+                'price' => 'required',
+            ]);
+
+            $product = Product::find($id);
+            $product->title       = $request->title;
+            $product->description = $request->description;
+            $product->price       = $request->price;
+            if ($request->file('image')) {
+
+                $this->validate($request, ['image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',]);
+
+                //remove old photo from folder if exist
+                if ($product->image) {
+                    $productImage = public_path("images/products/{$product->image}");
+                    if (File::exists($productImage)) {
+                        unlink($productImage);
+                    }
+                }
+
+
+                $filename = time().'.'.$request->file('image')->getClientOriginalExtension();
+                $request->image->move(public_path('images/products'), $filename);
+                $product->image = $filename;
+            }
+            $product->save();            
+            return response()->json(['status' => 'success', 'message' => 'Product successfully updated!'], 201);
+        }catch (\Exception $exception) {
+            return response()->json(['status' => 'error', 'message' => 'Error', 'errors' => $exception->errors()], 422);
+        }
     }
 
     /**
@@ -164,6 +139,15 @@ class ProductsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $product = Product::find($id);
+        if ($product->image) {
+            $productImage = public_path("images/products/{$product->image}");
+            if (File::exists($productImage)) {
+                unlink($productImage);
+            }
+        }
+        $product->delete();
+
+        return Response::json(['message' => 'The product deleted successfully!'], 200);
     }
 }
